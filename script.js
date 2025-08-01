@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // 音声が終了している場合（7:59以上）は最初から再生
             if (isAudioEnded && !userDragged) {
                 audio.currentTime = 0;
-                isAudioEnded = false;
             }
+            isAudioEnded = false;
             audio.play().catch(handleAudioError);
         } else {
             audio.pause();
@@ -54,8 +54,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const duration = audio.duration;
         if (!duration || isNaN(duration) || duration <= 0) return;
 
-        // 7:59（479秒）以上になったら自動で最初に戻る（ただし、ユーザーのドラッグ操作でない場合のみ）
+        // 7:59（479秒）以上になったら音声を停止（ただし、ユーザーのドラッグ操作でない場合のみ）
         if (currentTime >= 479 && !userDragged) {
+            audio.pause();
             audio.currentTime = 0;
             isAudioEnded = true;
             return;
@@ -69,7 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     audio.addEventListener('play', () => {
-        isAudioEnded = false;
         playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
         playBtn.setAttribute('aria-label', '一時停止');
     });
