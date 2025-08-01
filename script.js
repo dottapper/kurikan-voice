@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function togglePlay() {
         if (audio.paused) {
+            // 音声が終了している場合は最初から再生
+            if (audio.ended || audio.currentTime === audio.duration) {
+                audio.currentTime = 0;
+                updateProgressBar(0, audio.duration);
+                currentTimeSpan.textContent = '0:00';
+            }
             audio.play().catch(handleAudioError);
         } else {
             audio.pause();
@@ -65,8 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     audio.addEventListener('ended', () => {
-        progressFill.style.width = '0%';
-        currentTimeSpan.textContent = '0:00';
         playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
         playBtn.setAttribute('aria-label', '再生');
     });
