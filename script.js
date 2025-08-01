@@ -28,9 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isAudioEnded) {
                 audio.currentTime = 0;
                 isAudioEnded = false;
-                // プログレスバーを即座に更新
-                updateProgressBar(0, audio.duration);
-                currentTimeSpan.textContent = '0:00';
             }
             audio.play().catch(handleAudioError);
         } else {
@@ -217,6 +214,11 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     const updateProgressBar = (currentTime, duration) => {
+        if (!duration || isNaN(duration) || duration <= 0) {
+            progressFill.style.width = '0%';
+            progressBar.setAttribute('aria-valuenow', 0);
+            return;
+        }
         const progress = (currentTime / duration) * 100;
         progressFill.style.width = `${Math.max(0, Math.min(progress, 100))}%`;
         progressBar.setAttribute('aria-valuenow', Math.round(progress));
