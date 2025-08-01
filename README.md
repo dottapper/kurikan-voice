@@ -34,7 +34,7 @@
 1. リポジトリをクローン
 ```bash
 git clone https://github.com/dottapper/kurikan-voice.git
-cd https://github.com/dottapper/kurikan-voice.git
+cd kurikan-voice
 ```
 
 2. ブラウザで開く
@@ -53,7 +53,7 @@ npx serve .
 ├── index.html          # メインHTMLファイル
 ├── style.css           # スタイルシート
 ├── script.js           # JavaScript機能
-├── Bikkuri Morinonaka_Mix250722.wav  # 音声ファイル
+├── Bikkuri_Morinonaka_Mix250722_01.mp3  # 音声ファイル
 └── README.md           # このファイル
 ```
 

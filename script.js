@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuDropdown = document.getElementById('menuDropdown');
     const playbackSpeed = document.getElementById('playbackSpeed');
 
+    const AUDIO_END_TIME = 479; // 音声の終端を指定（秒）
     let isDragging = false;
     let lastTimeUpdate = 0;
     let isAudioEnded = false;
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!duration || isNaN(duration) || duration <= 0) return;
 
         // 7:59（479秒）以上になったら音声を停止（ただし、ユーザーのドラッグ操作でない場合のみ）
-        if (currentTime >= 479 && !userDragged) {
+        if (currentTime >= AUDIO_END_TIME && !userDragged) {
             audio.pause();
             audio.currentTime = 0;
             isAudioEnded = true;
