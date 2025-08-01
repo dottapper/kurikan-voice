@@ -77,50 +77,82 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Progress bar
     let progressBarRect = null;
-    const updateProgressBarRect = () => { progressBarRect = progressBar.getBoundingClientRect(); };
+    let isPointerDown = false;
+    
+    const updateProgressBarRect = () => { 
+        progressBarRect = progressBar.getBoundingClientRect(); 
+    };
+    
     window.addEventListener('resize', updateProgressBarRect);
     updateProgressBarRect();
 
     const getClientX = (e) => {
         if (e.type.includes('touch')) {
-            return e.touches[0] ? e.touches[0].clientX : (e.changedTouches[0] ? e.changedTouches[0].clientX : null);
+            const touch = e.touches && e.touches[0] ? e.touches[0] : 
+                         e.changedTouches && e.changedTouches[0] ? e.changedTouches[0] : null;
+            return touch ? touch.clientX : null;
         }
         return e.clientX;
     };
 
     const startDragging = (e) => {
+        if (isPointerDown) return; // 重複防止
+        
+        e.preventDefault();
+        isPointerDown = true;
         isDragging = true;
         initializeAudioForMobile();
         updateProgressBarRect();
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('touchmove', drag, { passive: false });
-        document.addEventListener('mouseup', stopDragging);
-        document.addEventListener('touchend', stopDragging);
+        
+        // イベントタイプに応じてリスナーを追加
+        if (e.type === 'mousedown') {
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDragging);
+        } else if (e.type === 'touchstart') {
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchend', stopDragging);
+            document.addEventListener('touchcancel', stopDragging);
+        }
+        
         updateProgress(e);
     };
 
     const drag = (e) => {
-        if (isDragging) updateProgress(e);
+        if (!isDragging || !isPointerDown) return;
+        e.preventDefault();
+        updateProgress(e);
     };
 
-    const stopDragging = () => {
+    const stopDragging = (e) => {
+        if (!isPointerDown) return;
+        
+        e.preventDefault();
+        isPointerDown = false;
         isDragging = false;
+        
+        // 全てのイベントリスナーを削除
         document.removeEventListener('mousemove', drag);
         document.removeEventListener('touchmove', drag);
         document.removeEventListener('mouseup', stopDragging);
         document.removeEventListener('touchend', stopDragging);
+        document.removeEventListener('touchcancel', stopDragging);
     };
 
     const updateProgress = (e) => {
-        e.preventDefault();
         const rect = progressBarRect || progressBar.getBoundingClientRect();
         const clientX = getClientX(e);
+        
         if (clientX === null) return;
+        
         const clickX = Math.max(0, Math.min(clientX - rect.left, rect.width));
         const duration = audio.duration;
-        if (duration > 0) {
-            audio.currentTime = (clickX / rect.width) * duration;
-        }
+        
+        if (!duration || isNaN(duration) || duration <= 0) return;
+        
+        const newTime = (clickX / rect.width) * duration;
+        const clampedTime = Math.max(0, Math.min(newTime, duration));
+        
+        audio.currentTime = clampedTime;
     };
 
     progressBar.addEventListener('mousedown', startDragging);
