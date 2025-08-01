@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let isDragging = false;
     let lastTimeUpdate = 0;
     let isAudioEnded = false;
-    let isResetting = false;
 
     // Play/Pause
     playBtn.addEventListener('click', (e) => {
@@ -27,16 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (audio.paused) {
             // 音声が終了している場合は最初から再生
             if (isAudioEnded) {
-                isResetting = true;
                 audio.currentTime = 0;
                 isAudioEnded = false;
                 // プログレスバーを即座に更新
                 updateProgressBar(0, audio.duration);
                 currentTimeSpan.textContent = '0:00';
-                // 短時間後にリセットフラグをクリア
-                setTimeout(() => {
-                    isResetting = false;
-                }, 100);
             }
             audio.play().catch(handleAudioError);
         } else {
@@ -57,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     audio.addEventListener('timeupdate', () => {
-        if (isDragging || isResetting) return;
+        if (isDragging) return;
         const currentTime = audio.currentTime;
         const duration = audio.duration;
         if (!duration || isNaN(duration) || duration <= 0) return;
@@ -97,12 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
         totalTimeSpan.textContent = 'エラー';
     });
     
-    audio.addEventListener('seeked', () => {
-        // シーク操作が完了したらリセットフラグをクリア
-        if (isResetting) {
-            isResetting = false;
-        }
-    });
 
     // Progress bar
     let progressBarRect = null;
@@ -197,19 +185,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const newTime = (clickX / rect.width) * duration;
         const clampedTime = Math.max(0, Math.min(newTime, duration));
         
-        // 音声が終了している場合は最初から再生を開始
-        if (isAudioEnded) {
-            isAudioEnded = false;
-            isResetting = true;
-            const resetTime = 0;
-            audio.currentTime = resetTime;
-            updateProgressBar(resetTime, duration);
-            currentTimeSpan.textContent = formatTime(resetTime);
-            setTimeout(() => {
-                isResetting = false;
-            }, 100);
-            return;
-        }
         
         // ユーザーが手動で位置を変更した場合は終了状態をリセット
         isAudioEnded = false;
