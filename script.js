@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let isDragging = false;
     let lastTimeUpdate = 0;
     let isAudioEnded = false;
+    let isResetting = false;
 
     // Play/Pause
     playBtn.addEventListener('click', (e) => {
@@ -26,11 +27,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (audio.paused) {
             // 音声が終了している場合は最初から再生
             if (isAudioEnded) {
+                isResetting = true;
                 audio.currentTime = 0;
                 isAudioEnded = false;
                 // プログレスバーを即座に更新
                 updateProgressBar(0, audio.duration);
                 currentTimeSpan.textContent = '0:00';
+                // 短時間後にリセットフラグをクリア
+                setTimeout(() => {
+                    isResetting = false;
+                }, 100);
             }
             audio.play().catch(handleAudioError);
         } else {
@@ -51,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     audio.addEventListener('timeupdate', () => {
-        if (isDragging) return;
+        if (isDragging || isResetting) return;
         const currentTime = audio.currentTime;
         const duration = audio.duration;
         if (!duration || isNaN(duration) || duration <= 0) return;
@@ -89,6 +95,13 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('音声ファイル読み込みエラー:', e);
         currentTimeSpan.textContent = 'エラー';
         totalTimeSpan.textContent = 'エラー';
+    });
+    
+    audio.addEventListener('seeked', () => {
+        // シーク操作が完了したらリセットフラグをクリア
+        if (isResetting) {
+            isResetting = false;
+        }
     });
 
     // Progress bar
