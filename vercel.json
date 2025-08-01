@@ -2,19 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.css",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.mp3",
+      "src": "**/*",
       "use": "@vercel/static"
     }
   ],
@@ -26,7 +14,7 @@
   ],
   "headers": [
     {
-      "source": "/(.*\.(js|css|mp3))",
+      "source": "/(.*\\.(js|css|mp3))",
       "headers": [
         {
           "key": "Cache-Control",
@@ -35,7 +23,7 @@
       ]
     },
     {
-      "source": "/(.*\.html)",
+      "source": "/(.*\\.html)",
       "headers": [
         {
           "key": "Cache-Control",
