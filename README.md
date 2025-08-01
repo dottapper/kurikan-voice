@@ -4,7 +4,7 @@
 
 ## 特徴
 
-- 🎵 **高品質音声再生**: WAV形式の音声ファイルをサポート
+
 - 📱 **モバイル対応**: iPhone/Androidで最適化されたタッチ操作
 - ♿ **アクセシビリティ**: スクリーンリーダー対応、キーボード操作サポート
 - ⚡ **高速読み込み**: 軽量で高速なWebアプリケーション
@@ -33,8 +33,8 @@
 
 1. リポジトリをクローン
 ```bash
-git clone https://github.com/dottapper/Kazuichi-Kurita-s-audiobook-narration.git
-cd Kazuichi-Kurita-s-audiobook-narration
+git clone https://github.com/dottapper/kurikan-voice.git
+cd https://github.com/dottapper/kurikan-voice.git
 ```
 
 2. ブラウザで開く

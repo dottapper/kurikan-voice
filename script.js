@@ -30,7 +30,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function handleAudioError(error) {
-        // Playback error handling (e.g., show a user message) can be implemented here.
+        console.error('音声再生エラー:', error);
+        // 再生ボタンの状態をリセット
+        playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+        playBtn.setAttribute('aria-label', '再生');
     }
 
     // Audio events
@@ -48,9 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentTimeSpan.textContent = formatTime(currentTime);
             lastTimeUpdate = currentTime;
         }
-        const progress = (currentTime / duration) * 100;
-        progressFill.style.width = `${progress}%`;
-        progressBar.setAttribute('aria-valuenow', Math.round(progress));
+        updateProgressBar(currentTime, duration);
     });
 
     audio.addEventListener('play', () => {
@@ -73,6 +74,12 @@ document.addEventListener('DOMContentLoaded', function() {
     audio.addEventListener('volumechange', () => {
         updateVolumeIcon();
         updateVolumeSlider();
+    });
+    
+    audio.addEventListener('error', (e) => {
+        console.error('音声ファイル読み込みエラー:', e);
+        currentTimeSpan.textContent = 'エラー';
+        totalTimeSpan.textContent = 'エラー';
     });
 
     // Progress bar
@@ -120,13 +127,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const drag = (e) => {
         if (!isDragging || !isPointerDown) return;
         e.preventDefault();
-        updateProgress(e);
+        updateProgressVisual(e);
     };
 
     const stopDragging = (e) => {
         if (!isPointerDown) return;
         
         e.preventDefault();
+        
+        // 最終的な位置で音声の時刻を設定
+        const rect = progressBarRect || progressBar.getBoundingClientRect();
+        const clientX = getClientX(e);
+        
+        if (clientX !== null) {
+            const clickX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+            const duration = audio.duration;
+            
+            if (duration && !isNaN(duration) && duration > 0) {
+                const newTime = (clickX / rect.width) * duration;
+                const clampedTime = Math.max(0, Math.min(newTime, duration));
+                audio.currentTime = clampedTime;
+            }
+        }
+        
         isPointerDown = false;
         isDragging = false;
         
@@ -152,7 +175,37 @@ document.addEventListener('DOMContentLoaded', function() {
         const newTime = (clickX / rect.width) * duration;
         const clampedTime = Math.max(0, Math.min(newTime, duration));
         
+        // 音声の現在時刻を設定
         audio.currentTime = clampedTime;
+        
+        // ドラッグ中の視覚的フィードバック
+        updateProgressBar(clampedTime, duration);
+        currentTimeSpan.textContent = formatTime(clampedTime);
+    };
+    
+    const updateProgressVisual = (e) => {
+        const rect = progressBarRect || progressBar.getBoundingClientRect();
+        const clientX = getClientX(e);
+        
+        if (clientX === null) return;
+        
+        const clickX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+        const duration = audio.duration;
+        
+        if (!duration || isNaN(duration) || duration <= 0) return;
+        
+        const newTime = (clickX / rect.width) * duration;
+        const clampedTime = Math.max(0, Math.min(newTime, duration));
+        
+        // ドラッグ中は視覚的な更新のみ
+        updateProgressBar(clampedTime, duration);
+        currentTimeSpan.textContent = formatTime(clampedTime);
+    };
+    
+    const updateProgressBar = (currentTime, duration) => {
+        const progress = (currentTime / duration) * 100;
+        progressFill.style.width = `${Math.max(0, Math.min(progress, 100))}%`;
+        progressBar.setAttribute('aria-valuenow', Math.round(progress));
     };
 
     progressBar.addEventListener('mousedown', startDragging);
