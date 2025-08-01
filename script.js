@@ -39,65 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // エラーメッセージの定義（保守性向上）
-    const ERROR_MESSAGES = {
-        'NotAllowedError': ['音声を再生するには画面をタップしてください。', 'info'],
-        'NotSupportedError': ['申し訳ありません。この音声ファイルは再生できません。', 'error'],
-        'AbortError': ['音声の読み込みが中断されました。もう一度お試しください。', 'warning'],
-        'default': ['音声の再生中に問題が発生しました。ネットワーク接続をご確認ください。', 'error']
-    };
-    
-    // ユーザーフレンドリーなメッセージ表示
-    function showUserFriendlyMessage(message, type = 'info') {
-        // 既存の通知があれば削除
-        const existingNotification = document.querySelector('.notification');
-        if (existingNotification) {
-            existingNotification.remove();
-        }
-        
-        // 新しい通知要素を作成
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
-        notification.setAttribute('role', 'alert');
-        notification.setAttribute('aria-live', 'polite');
-        
-        // bodyに追加
-        document.body.appendChild(notification);
-        
-        // アニメーション用のディレイ
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-        
-        // 5秒後に自動で消す
-        setTimeout(() => {
-            if (notification.classList.contains('show')) {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
-                    }
-                }, 400);
-            }
-        }, 5000);
-        
-        // クリックでも消せるようにする
-        notification.addEventListener('click', () => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
-            }, 400);
-        });
-    }
-    
-    // エラーハンドリングの統一関数
-    function handleAudioError(error) {
-        const [message, type] = ERROR_MESSAGES[error.name] || ERROR_MESSAGES['default'];
-        showUserFriendlyMessage(message, type);
-    }
+
     
     // 音声のメタデータが読み込まれた時の処理
     audio.addEventListener('loadedmetadata', function() {
@@ -150,10 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
     audio.addEventListener('ended', function() {
         progressFill.style.width = '0%';
         currentTimeSpan.textContent = '0:00';
-        // 絵本読み聞かせ完了の優しいメッセージ
-        setTimeout(() => {
-            showUserFriendlyMessage('お話が終わりました。もう一度聞きたい場合は再生ボタンを押してください。', 'info');
-        }, 500);
     });
     
     // プログレスバーのタッチ/マウスイベント（最適化版）
@@ -534,26 +472,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 絵本読み聞かせ用途に最適化されたエラーハンドリング
     audio.addEventListener('error', function(e) {
         console.error('音声ファイルエラー:', e);
-        const error = e.target.error;
-        
-        if (error) {
-            switch (error.code) {
-                case error.MEDIA_ERR_ABORTED:
-                    showUserFriendlyMessage('音声の読み込みが中断されました。もう一度お試しください。', 'warning');
-                    break;
-                case error.MEDIA_ERR_NETWORK:
-                    showUserFriendlyMessage('ネットワークの問題で音声を読み込めません。Wi-Fiやモバイルデータの接続をご確認ください。', 'error');
-                    break;
-                case error.MEDIA_ERR_DECODE:
-                    showUserFriendlyMessage('申し訳ありません。この音声ファイルに問題があります。', 'error');
-                    break;
-                case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                    showUserFriendlyMessage('この端末ではこの音声ファイルを再生できません。', 'error');
-                    break;
-                default:
-                    showUserFriendlyMessage('音声の読み込み中に問題が発生しました。しばらくお待ちいただいてから、もう一度お試しください。', 'warning');
-            }
-        }
     });
     
     // 読み込み開始時の処理
@@ -563,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ネットワークの問題で停止した場合
     audio.addEventListener('stalled', function() {
-        showUserFriendlyMessage('ネットワークが遅いため、音声の読み込みが停止しました。しばらくお待ちください。', 'warning');
+        console.log('音声の読み込みが停止しました');
     });
     
     // 再生准備完了
