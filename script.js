@@ -197,6 +197,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const newTime = (clickX / rect.width) * duration;
         const clampedTime = Math.max(0, Math.min(newTime, duration));
         
+        // 音声が終了している場合は最初から再生を開始
+        if (isAudioEnded) {
+            isAudioEnded = false;
+            isResetting = true;
+            const resetTime = 0;
+            audio.currentTime = resetTime;
+            updateProgressBar(resetTime, duration);
+            currentTimeSpan.textContent = formatTime(resetTime);
+            setTimeout(() => {
+                isResetting = false;
+            }, 100);
+            return;
+        }
+        
         // ユーザーが手動で位置を変更した場合は終了状態をリセット
         isAudioEnded = false;
         
