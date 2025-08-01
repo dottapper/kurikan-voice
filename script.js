@@ -132,8 +132,16 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         toggleMute();
     });
-    volumeControl.addEventListener('mouseenter', () => volumeSlider.classList.add('show'));
-    volumeControl.addEventListener('mouseleave', () => volumeSlider.classList.remove('show'));
+    
+    // デスクトップのみでホバー機能を有効化
+    function isMobileDevice() {
+        return window.innerWidth <= 480 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
+    if (!isMobileDevice()) {
+        volumeControl.addEventListener('mouseenter', () => volumeSlider.classList.add('show'));
+        volumeControl.addEventListener('mouseleave', () => volumeSlider.classList.remove('show'));
+    }
 
     function toggleMute() {
         audio.muted = !audio.muted;
@@ -181,12 +189,23 @@ document.addEventListener('DOMContentLoaded', function() {
             iconType = 'high';
         }
         volumeBtn.innerHTML = VOLUME_ICONS[iconType];
-        const labels = {
-            muted: 'ミュート中 - クリックで音量を復元',
-            low: `音量: ${Math.round(volume * 100)}% - クリックでミュート`,
-            high: `音量: ${Math.round(volume * 100)}% - クリックでミュート`
-        };
-        volumeBtn.setAttribute('aria-label', labels[iconType]);
+        
+        // モバイル用のラベル
+        if (isMobileDevice()) {
+            const mobileLabels = {
+                muted: 'ミュート中 - タップで音声をオンにする',
+                low: 'タップでミュート/オン切り替え',
+                high: 'タップでミュート/オン切り替え'
+            };
+            volumeBtn.setAttribute('aria-label', mobileLabels[iconType]);
+        } else {
+            const labels = {
+                muted: 'ミュート中 - クリックで音量を復元',
+                low: `音量: ${Math.round(volume * 100)}% - クリックでミュート`,
+                high: `音量: ${Math.round(volume * 100)}% - クリックでミュート`
+            };
+            volumeBtn.setAttribute('aria-label', labels[iconType]);
+        }
     }
 
     // Menu
