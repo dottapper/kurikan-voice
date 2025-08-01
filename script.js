@@ -210,6 +210,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ミュート機能の切り替え（安全性向上）
     function toggleMute() {
+        console.log('toggleMute called, current isMuted:', isMuted, 'current volume:', audio.volume);
+        
         if (isMuted) {
             // ミュート解除
             const success = safeSetVolume(audio, previousVolume);
@@ -217,6 +219,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 volumeRange.value = previousVolume * 100;
                 isMuted = false;
                 updateVolumeIcon(previousVolume);
+                console.log('Unmuted successfully, volume set to:', previousVolume);
+            } else {
+                console.warn('Failed to unmute - volume control not available');
             }
         } else {
             // ミュート
@@ -226,6 +231,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 volumeRange.value = 0;
                 isMuted = true;
                 updateVolumeIcon(0);
+                console.log('Muted successfully');
+            } else {
+                console.warn('Failed to mute - volume control not available');
             }
         }
     }
@@ -239,10 +247,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // iOSでの音量制御エラーを安全に処理（ユーティリティ関数）
     function safeSetVolume(audio, volume) {
         try {
+            const oldVolume = audio.volume;
             audio.volume = volume;
-            return true;
+            
+            // 実際に音量が設定されたかチェック
+            if (Math.abs(audio.volume - volume) < 0.01) {
+                console.log('Volume set successfully:', volume);
+                return true;
+            } else {
+                console.warn('Volume setting failed - expected:', volume, 'actual:', audio.volume);
+                return false;
+            }
         } catch (error) {
-            console.log('iOSではシステム音量で制御されます');
+            console.error('Volume setting error:', error);
             // iOS では音量制御ができないため、スライダーを無効化
             if (volumeRange) {
                 volumeRange.disabled = true;
@@ -286,13 +303,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 音量設定の統一関数（安全性向上）
     function setVolume(volume) {
+        console.log('setVolume called with volume:', volume, 'current isMuted:', isMuted);
+        
         const success = safeSetVolume(audio, volume);
         
         if (success) {
             // スライダーを動かしたらミュート状態を解除
             if (isMuted && volume > 0) {
                 isMuted = false;
+                console.log('Unmuted due to volume change');
             }
+        } else {
+            console.warn('Failed to set volume - volume control not available');
         }
         
         updateVolumeIcon(volume);
@@ -422,12 +444,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 初期設定（安全な音量設定関数使用）
+    console.log('Initializing audio with volume settings...');
     const initialVolumeSuccess = safeSetVolume(audio, 1.0);
-    updateVolumeIcon(1.0);
     
-    if (!initialVolumeSuccess) {
+    if (initialVolumeSuccess) {
+        isMuted = false;
+        previousVolume = 1.0;
+        console.log('Audio initialized successfully with volume 1.0');
+    } else {
         console.log('このデバイスでは音量はシステム設定で制御されます');
+        // 音量制御ができない場合はミュート状態として扱う
+        isMuted = true;
+        previousVolume = 0;
     }
+    
+    updateVolumeIcon(audio.volume);
     
     // モバイル用最適化
     let audioInitialized = false;
