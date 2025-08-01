@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let isDragging = false;
     let lastTimeUpdate = 0;
     let isAudioEnded = false;
+    let userDragged = false; // ユーザーがドラッグ操作をしたかフラグ
 
     // Play/Pause
     playBtn.addEventListener('click', (e) => {
@@ -24,8 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function togglePlay() {
         if (audio.paused) {
-            // 音声が終了している場合は最初から再生
-            if (isAudioEnded) {
+            // 音声が終了している場合（7:59以上）は最初から再生
+            if (isAudioEnded && !userDragged) {
                 audio.currentTime = 0;
                 isAudioEnded = false;
             }
@@ -53,6 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const duration = audio.duration;
         if (!duration || isNaN(duration) || duration <= 0) return;
 
+        // 7:59（479秒）以上になったら自動で最初に戻る（ただし、ユーザーのドラッグ操作でない場合のみ）
+        if (currentTime >= 479 && !userDragged) {
+            audio.currentTime = 0;
+            isAudioEnded = true;
+            return;
+        }
+
         if (Math.abs(currentTime - lastTimeUpdate) >= 0.5) {
             currentTimeSpan.textContent = formatTime(currentTime);
             lastTimeUpdate = currentTime;
@@ -73,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     audio.addEventListener('ended', () => {
         isAudioEnded = true;
+        userDragged = false; // 音声が自然に終了した場合はドラッグフラグをリセット
         playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
         playBtn.setAttribute('aria-label', '再生');
     });
@@ -185,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // ユーザーが手動で位置を変更した場合は終了状態をリセット
         isAudioEnded = false;
+        userDragged = true; // ユーザーのドラッグ操作をマーク
         
         // 音声の現在時刻を設定
         audio.currentTime = clampedTime;
