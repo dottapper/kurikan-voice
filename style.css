@@ -18,6 +18,7 @@
     --border-radius-md: 12px;
     --border-radius-sm: 8px;
     --border-radius-xs: 6px;
+    --border-radius-xxs: 4px;
     
     /* シャドウ変数 */
     --shadow-elevated: 0 8px 24px rgba(139, 69, 19, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.9);
@@ -34,6 +35,12 @@
     /* フォント変数 */
     --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-family-mono: 'Courier New', monospace;
+    
+    /* 通知変数 */
+    --notification-info: #8B4513;
+    --notification-warning: #FF9800;
+    --notification-error: #F44336;
+    --notification-success: #4CAF50;
 }
 
 * {
@@ -361,8 +368,6 @@ body::before {
     font-size: 14px;
     color: var(--tertiary-brown);
     font-family: var(--font-family);
-    writing-mode: horizontal-tb;
-    text-orientation: mixed;
     font-weight: 600;
 }
 
@@ -389,8 +394,6 @@ body::before {
     padding-right: 30px;
     min-width: 80px;
     font-family: var(--font-family);
-    writing-mode: horizontal-tb;
-    text-orientation: mixed;
     font-weight: 600;
     color: var(--tertiary-brown);
     box-shadow: 
@@ -474,6 +477,67 @@ body::before {
     }
 }
 
+
+/* 通知システム */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gradient-light);
+    border: 2px solid var(--primary-brown);
+    border-radius: var(--border-radius-md);
+    padding: 15px 20px;
+    box-shadow: var(--shadow-elevated);
+    max-width: 90%;
+    min-width: 280px;
+    z-index: 2000;
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--tertiary-brown);
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.notification.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.notification.info {
+    border-left: 4px solid var(--notification-info);
+}
+
+.notification.warning {
+    border-left: 4px solid var(--notification-warning);
+}
+
+.notification.error {
+    border-left: 4px solid var(--notification-error);
+}
+
+.notification.success {
+    border-left: 4px solid var(--notification-success);
+}
+
+.notification::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 40%, rgba(139, 69, 19, 0.05) 50%, transparent 60%);
+    border-radius: var(--border-radius-md);
+    pointer-events: none;
+}
 
 /* iOS Safari の最適化 */
 @supports (-webkit-touch-callout: none) {

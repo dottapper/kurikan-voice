@@ -49,8 +49,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ユーザーフレンドリーなメッセージ表示
     function showUserFriendlyMessage(message, type = 'info') {
-        // 絵本読み聞かせ用途なので、優しいトーンでメッセージを表示
-        alert(message);
+        // 既存の通知があれば削除
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+        
+        // 新しい通知要素を作成
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        notification.setAttribute('role', 'alert');
+        notification.setAttribute('aria-live', 'polite');
+        
+        // bodyに追加
+        document.body.appendChild(notification);
+        
+        // アニメーション用のディレイ
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // 5秒後に自動で消す
+        setTimeout(() => {
+            if (notification.classList.contains('show')) {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 400);
+            }
+        }, 5000);
+        
+        // クリックでも消せるようにする
+        notification.addEventListener('click', () => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 400);
+        });
     }
     
     // エラーハンドリングの統一関数
