@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // 音声が終了している場合（7:59以上）は最初から再生
             if (isAudioEnded && !userDragged) {
                 audio.currentTime = 0;
+                isAudioEnded = false;
             }
-            isAudioEnded = false;
             audio.play().catch(handleAudioError);
         } else {
             audio.pause();
@@ -71,6 +71,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     audio.addEventListener('play', () => {
+        // 再生開始時に終了状態をクリア（リセット済みの場合のみ）
+        if (audio.currentTime === 0) {
+            isAudioEnded = false;
+            userDragged = false;
+        }
         playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
         playBtn.setAttribute('aria-label', '一時停止');
     });
