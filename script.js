@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let isDragging = false;
     let lastTimeUpdate = 0;
+    let isAudioEnded = false;
 
     // Play/Pause
     playBtn.addEventListener('click', (e) => {
@@ -24,8 +25,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function togglePlay() {
         if (audio.paused) {
             // 音声が終了している場合は最初から再生
-            if (audio.ended || audio.currentTime === audio.duration) {
+            if (isAudioEnded) {
                 audio.currentTime = 0;
+                isAudioEnded = false;
+                // プログレスバーを即座に更新
                 updateProgressBar(0, audio.duration);
                 currentTimeSpan.textContent = '0:00';
             }
@@ -61,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     audio.addEventListener('play', () => {
+        isAudioEnded = false;
         playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
         playBtn.setAttribute('aria-label', '一時停止');
     });
@@ -71,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     audio.addEventListener('ended', () => {
+        isAudioEnded = true;
         playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
         playBtn.setAttribute('aria-label', '再生');
     });
@@ -178,6 +183,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const newTime = (clickX / rect.width) * duration;
         const clampedTime = Math.max(0, Math.min(newTime, duration));
+        
+        // ユーザーが手動で位置を変更した場合は終了状態をリセット
+        isAudioEnded = false;
         
         // 音声の現在時刻を設定
         audio.currentTime = clampedTime;
