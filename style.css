@@ -490,3 +490,7 @@ body::before {
         -webkit-touch-callout: none;
     }
 } 
+
+.hidden {
+    display: none;
+} 

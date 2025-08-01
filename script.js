@@ -443,16 +443,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     audio.volume = 1.0;
                 } catch (volumeError) {
-                    console.log('iOSではシステム音量で制御されます');
                     // iOSではボリュームスライダーを非表示に
                     const volumeControl = document.querySelector('.volume-control');
                     if (volumeControl) {
-                        volumeControl.style.display = 'none';
+                        volumeControl.classList.add('hidden');
                     }
                 }
                 audioInitialized = true;
             } catch (error) {
-                console.error('音声の初期化エラー:', error);
                 // エラーが発生しても初期化フラグは立てることで、無限ループを防ぐ
                 audioInitialized = true;
             }
@@ -471,21 +469,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 絵本読み聞かせ用途に最適化されたエラーハンドリング
     audio.addEventListener('error', function(e) {
-        console.error('音声ファイルエラー:', e);
     });
     
     // 読み込み開始時の処理
     audio.addEventListener('loadstart', function() {
-        console.log('音声ファイル読み込み開始');
     });
     
     // ネットワークの問題で停止した場合
     audio.addEventListener('stalled', function() {
-        console.log('音声の読み込みが停止しました');
     });
     
     // 再生准備完了
     audio.addEventListener('canplaythrough', function() {
-        console.log('音声再生の準備が完了しました');
     });
 });
